@@ -12,6 +12,11 @@ func main() {
 			"message": "pong",
 		})
 	})
+	router.GET("/macia", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "macia",
+		})
+	})
 
-	router.Run(":8080")
+	router.Run("0.0.0.0:8080")
 }
