@@ -1,10 +1,15 @@
 package main
 
 import (
+	"CyberInfoExtractor/database"
+
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	database.Connect()
+	database.Migrate()
+
 	router := gin.Default()
 
 	router.GET("/ping", func(c *gin.Context) {
