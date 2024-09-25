@@ -1,6 +1,7 @@
 package database
 
 import (
+	"CyberInfoExtractor/models"
 	"fmt"
 	"log"
 	"os"
@@ -31,5 +32,8 @@ func Connect() {
 }
 
 func Migrate() {
-
+	if err := DB.AutoMigrate(&models.VirusTotal{}); err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	log.Println("VirusTotal model migration")
 }
