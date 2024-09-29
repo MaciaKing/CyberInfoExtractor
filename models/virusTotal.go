@@ -11,7 +11,7 @@ var MaxRequestPerDay = 500
 var RequestPerMinute = 4
 
 var apiKey = os.Getenv("VIRUS_TOTAL_API_KEY")
-var baseUrl = "https://www.virustotal.com/api/v3/domains/google.com"
+var baseUrl = "https://www.virustotal.com/api/v3/"
 
 type VirusTotal struct {
 	Id                   int    `gorm:"primaryKey;autoIncrement" json:"id"`
@@ -21,8 +21,8 @@ type VirusTotal struct {
 	Maliciuos            bool   `json:malicious`
 }
 
-func domainReport(domainToRequest string) string {
-	endpoint := "/domains/" + domainToRequest
+func DomainReport(domainToRequest string) string {
+	endpoint := "domains/" + domainToRequest
 
 	req, _ := http.NewRequest("GET", baseUrl+endpoint, nil)
 
