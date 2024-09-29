@@ -3,7 +3,6 @@ package models
 import (
 	"CyberInfoExtractor/cmd/globals"
 	"bufio"
-	"fmt"
 	"os"
 )
 
@@ -25,28 +24,38 @@ func ReadFile(filePath string) error {
 	return nil
 }
 
-func ReadFileFrom(filepath string, startLineToRead int,
-	totalsLineToRead int) error {
+func ReadFileFrom(filepath string, startLineToRead int, totalsLineToRead int) (int, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	defer file.Close()
 
-	actualLineRead := 0
+	currentLine := 0
+	linesRead := 0
+
 	scanner := bufio.NewScanner(file)
+	// Read file
 	for scanner.Scan() {
-		// if all lines are read
-		if totalsLineToRead >= startLineToRead+actualLineRead {
+		currentLine++
+		//  Start reading from the startLineToRead line.
+		if currentLine < startLineToRead {
+			continue
+		}
+		globals.LinesReads <- scanner.Text()
+		linesRead++
+		// If we have already read the total number of lines requested, we are done.
+		if linesRead >= totalsLineToRead {
 			break
 		}
-
-		if actualLineRead >= startLineToRead {
-			globals.LinesReads <- scanner.Text()
-		}
-		actualLineRead += 1
 	}
 
-	fmt.Println(totalsLineToRead - startLineToRead + actualLineRead)
-	return nil
+	// If we have not read enough lines but have reached the end of the file,
+	// we simply report that we have reached the end and there are no
+	// more lines to read. We return the number of lines left to read.
+	if linesRead < totalsLineToRead {
+		return totalsLineToRead - linesRead, nil
+	}
+
+	return 0, nil
 }

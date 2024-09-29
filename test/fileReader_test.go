@@ -28,32 +28,36 @@ func TestReadFile(t *testing.T) {
 
 func TestReadFileFrom(t *testing.T) {
 	wrongFilePath := "random"
-	err := models.ReadFileFrom(wrongFilePath, 1, 2)
+	linesNotReaded, err := models.ReadFileFrom(wrongFilePath, 1, 2)
 	assert.Error(t, err)
+	assert.Equal(t, linesNotReaded, -1)
 
 	filePath := "test.txt"
-	err1 := models.ReadFileFrom(filePath, 6, 3)
+	linesNotReaded1, err1 := models.ReadFileFrom(filePath, 6, 3)
 	assert.NoError(t, err1)
+	assert.Equal(t, linesNotReaded1, 0)
 
-	expected := []string{"line6", "line7", "line8"}
+	expected := []string{"line5", "line6", "line7"}
 	for _, exp := range expected {
 		got := <-globals.LinesReads
 		assert.Equal(t, exp, got)
 	}
 
-	err2 := models.ReadFileFrom(filePath, 9, 1)
+	linesNotReaded2, err2 := models.ReadFileFrom(filePath, 9, 1)
 	assert.NoError(t, err2)
+	assert.Equal(t, linesNotReaded2, 0)
 
-	expected2 := []string{"line9"}
+	expected2 := []string{"line8"}
 	for _, exp := range expected2 {
 		got := <-globals.LinesReads
 		assert.Equal(t, exp, got)
 	}
 
-	err3 := models.ReadFileFrom(filePath, 9, 2)
+	linesNotReaded3, err3 := models.ReadFileFrom(filePath, 9, 3)
 	assert.NoError(t, err3)
+	assert.Equal(t, linesNotReaded3, 1)
 
-	expected3 := []string{"line9"}
+	expected3 := []string{"line8", "line9"}
 	for _, exp := range expected3 {
 		got := <-globals.LinesReads
 		assert.Equal(t, exp, got)
