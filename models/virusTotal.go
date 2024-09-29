@@ -7,11 +7,13 @@ import (
 )
 
 // https://docs.virustotal.com/reference/public-vs-premium-api
-var MaxRequestPerDay = 500
-var RequestPerMinute = 4
 
-var apiKey = os.Getenv("VIRUS_TOTAL_API_KEY")
-var baseUrl = "https://www.virustotal.com/api/v3/"
+var (
+	MaxRequestPerDay = 500
+	RequestPerMinute = 4
+	apiKey           = os.Getenv("VIRUS_TOTAL_API_KEY")
+	baseUrl          = "https://www.virustotal.com/api/v3/"
+)
 
 type VirusTotal struct {
 	Id                   int    `gorm:"primaryKey;autoIncrement" json:"id"`
