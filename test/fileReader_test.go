@@ -9,12 +9,14 @@ import (
 )
 
 func TestReadFile(t *testing.T) {
+	fr := models.FileReader{}
+
 	wrongFilePath := "random"
-	err := models.ReadFile(wrongFilePath)
+	err := fr.ReadFile(wrongFilePath)
 	assert.Error(t, err)
 
 	filePath := "test.txt"
-	err1 := models.ReadFile(filePath)
+	err1 := fr.ReadFile(filePath)
 	assert.NoError(t, err1)
 
 	expected := []string{"line0", "line1", "line2"}
@@ -27,13 +29,15 @@ func TestReadFile(t *testing.T) {
 }
 
 func TestReadFileFrom(t *testing.T) {
+	fr := models.FileReader{}
+
 	wrongFilePath := "random"
-	linesNotReaded, err := models.ReadFileFrom(wrongFilePath, 1, 2)
+	linesNotReaded, err := fr.ReadFileFrom(wrongFilePath, 1, 2)
 	assert.Error(t, err)
 	assert.Equal(t, linesNotReaded, -1)
 
 	filePath := "test.txt"
-	linesNotReaded1, err1 := models.ReadFileFrom(filePath, 6, 3)
+	linesNotReaded1, err1 := fr.ReadFileFrom(filePath, 6, 3)
 	assert.NoError(t, err1)
 	assert.Equal(t, linesNotReaded1, 0)
 
@@ -43,7 +47,7 @@ func TestReadFileFrom(t *testing.T) {
 		assert.Equal(t, exp, got)
 	}
 
-	linesNotReaded2, err2 := models.ReadFileFrom(filePath, 9, 1)
+	linesNotReaded2, err2 := fr.ReadFileFrom(filePath, 9, 1)
 	assert.NoError(t, err2)
 	assert.Equal(t, linesNotReaded2, 0)
 
@@ -53,7 +57,7 @@ func TestReadFileFrom(t *testing.T) {
 		assert.Equal(t, exp, got)
 	}
 
-	linesNotReaded3, err3 := models.ReadFileFrom(filePath, 9, 3)
+	linesNotReaded3, err3 := fr.ReadFileFrom(filePath, 9, 3)
 	assert.NoError(t, err3)
 	assert.Equal(t, linesNotReaded3, 1)
 

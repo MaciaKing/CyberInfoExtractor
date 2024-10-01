@@ -9,7 +9,7 @@ import (
 type FileReader struct {
 }
 
-func ReadFile(filePath string) error {
+func (fr *FileReader) ReadFile(filePath string) error {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func ReadFile(filePath string) error {
 	return nil
 }
 
-func ReadFileFrom(filepath string, startLineToRead int, totalsLineToRead int) (int, error) {
+func (fr *FileReader) ReadFileFrom(filepath string, startLineToRead int, totalsLineToRead int) (int, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return -1, err
