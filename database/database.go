@@ -36,4 +36,9 @@ func Migrate() {
 		log.Fatal("Failed to connect to database:", err)
 	}
 	log.Println("VirusTotal model migration")
+
+	if err := DB.AutoMigrate(&models.DataToExtract{}); err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	log.Println("DataToExtract model migration")
 }
