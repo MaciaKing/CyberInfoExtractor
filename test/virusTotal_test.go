@@ -8,12 +8,18 @@ import (
 )
 
 func TestDomainReport(t *testing.T) {
-	result := models.DomainReport("ccc")
+	vt := models.VirusTotal{}
+	result := vt.DomainReport("ccc")
 	assert.Contains(t, result, "error")
+	assert.Contains(t, vt.InformationExtracted, "error")
 
-	result2 := models.DomainReport("8.8.8.8")
+	vt2 := models.VirusTotal{}
+	result2 := vt2.DomainReport("8.8.8.8")
 	assert.Contains(t, result2, "error")
+	assert.Contains(t, vt2.InformationExtracted, "error")
 
-	result3 := models.DomainReport("google.com")
+	vt3 := models.VirusTotal{}
+	result3 := vt3.DomainReport("google.com")
 	assert.Contains(t, result3, "data")
+	assert.Contains(t, vt3.InformationExtracted, "data")
 }

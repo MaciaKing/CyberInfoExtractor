@@ -23,7 +23,7 @@ type VirusTotal struct {
 	Maliciuos            bool   `json:malicious`
 }
 
-func DomainReport(domainToRequest string) string {
+func (vt *VirusTotal) DomainReport(domainToRequest string) string {
 	endpoint := "domains/" + domainToRequest
 
 	req, _ := http.NewRequest("GET", baseUrl+endpoint, nil)
@@ -35,6 +35,9 @@ func DomainReport(domainToRequest string) string {
 
 	defer res.Body.Close()
 	body, _ := io.ReadAll(res.Body)
+
+	vt.InformationExtracted = string(body)
+	vt.Domain = domainToRequest
 
 	return string(body)
 }
