@@ -20,7 +20,6 @@ type VirusTotal struct {
 	Ip                   string `json:"ip"`
 	Domain               string `json:"domain"`
 	InformationExtracted string `json:information_extracted`
-	Maliciuos            bool   `json:malicious`
 }
 
 func (vt *VirusTotal) DomainReport(domainToRequest string) string {
