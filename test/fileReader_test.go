@@ -71,6 +71,15 @@ func TestReadFileFrom(t *testing.T) {
 	cleanChan(globals.LinesReads)
 }
 
+func TestTotalLineCounter(t *testing.T) {
+	fr := models.FileReader{}
+
+	filePath := "test.txt"
+	lenFile, err1 := fr.TotalLineCounter(filePath)
+	assert.NoError(t, err1)
+	assert.Equal(t, lenFile, 10)
+}
+
 func cleanChan(chanToClean chan string) {
 	for len(chanToClean) > 0 {
 		<-globals.LinesReads
