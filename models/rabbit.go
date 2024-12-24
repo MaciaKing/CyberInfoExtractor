@@ -8,11 +8,13 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-// struct rabbitmq{}
+type Rabbitmq struct {
+}
+
 var rabbitConn *amqp.Connection
 var rabbitChannel *amqp.Channel
 
-func PushDataToQueue(qName, dataToSend string) {
+func (rb *Rabbitmq) PushDataToQueue(qName, dataToSend string) {
 	if rabbitChannel == nil {
 		log.Println("RabbitMQ channel is not initialized")
 		return
@@ -43,7 +45,7 @@ func PushDataToQueue(qName, dataToSend string) {
 	failOnError(err, "Failed to publish a message")
 }
 
-func ReadDataFromQueue(qName string, msgChan chan<- string) error {
+func (rb *Rabbitmq) ReadDataFromQueue(qName string, msgChan chan<- string) error {
 	if rabbitChannel == nil {
 		log.Println("RabbitMQ channel is not initialized")
 		return nil
@@ -83,14 +85,8 @@ func ReadDataFromQueue(qName string, msgChan chan<- string) error {
 	return nil
 }
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
 // Start connection to rabbitmq server
-func InitRabbitMQ() {
+func (rb *Rabbitmq) InitRabbitMQ() {
 	var err error
 	rabbitConn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -100,7 +96,7 @@ func InitRabbitMQ() {
 }
 
 // Close connection to Rabbitmq server
-func CloseRabbitMQ() {
+func (rb *Rabbitmq) CloseRabbitMQ() {
 	if rabbitChannel != nil {
 		err := rabbitChannel.Close()
 		failOnError(err, "Failed to close RabbitMQ channel")
@@ -110,4 +106,10 @@ func CloseRabbitMQ() {
 		failOnError(err, "Failed to close RabbitMQ connection")
 	}
 	log.Println("RabbitMQ connection closed successfully")
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Panicf("%s: %s", msg, err)
+	}
 }
