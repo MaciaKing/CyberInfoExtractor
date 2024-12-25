@@ -76,6 +76,7 @@ func (rb *Rabbitmq) ReadDataFromQueue(qName string, msgChan chan<- string) error
 
 	// Loop para leer mensajes continuamente
 	go func() {
+		defer close(msgChan)
 		for msg := range messages {
 			// Enviar el mensaje al canal de salida
 			msgChan <- string(msg.Body)
