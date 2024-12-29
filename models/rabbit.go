@@ -2,25 +2,26 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type Rabbitmq struct {
+	rabbitConn    *amqp.Connection
+	rabbitChannel *amqp.Channel
 }
 
-var rabbitConn *amqp.Connection
-var rabbitChannel *amqp.Channel
-
 func (rb *Rabbitmq) PushDataToQueue(qName, dataToSend string) {
-	if rabbitChannel == nil {
+	if rb.rabbitChannel == nil {
 		log.Println("RabbitMQ channel is not initialized")
 		return
 	}
 
-	q, err := rabbitChannel.QueueDeclare(
+	q, err := rb.rabbitChannel.QueueDeclare(
 		qName, // name
 		false, // durable
 		false, // delete when unused
@@ -33,7 +34,7 @@ func (rb *Rabbitmq) PushDataToQueue(qName, dataToSend string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = rabbitChannel.PublishWithContext(ctx,
+	err = rb.rabbitChannel.PublishWithContext(ctx,
 		"",     // exchange
 		q.Name, // routing key
 		false,  // mandatory
@@ -46,13 +47,13 @@ func (rb *Rabbitmq) PushDataToQueue(qName, dataToSend string) {
 }
 
 func (rb *Rabbitmq) ReadDataFromQueue(qName string, msgChan chan<- string) error {
-	if rabbitChannel == nil {
+	if rb.rabbitChannel == nil {
 		log.Println("RabbitMQ channel is not initialized")
 		return nil
 	}
 
 	// Declarar la cola
-	q, err := rabbitChannel.QueueDeclare(
+	q, err := rb.rabbitChannel.QueueDeclare(
 		qName, // name
 		false, // durable
 		false, // delete when unused
@@ -63,7 +64,7 @@ func (rb *Rabbitmq) ReadDataFromQueue(qName string, msgChan chan<- string) error
 	failOnError(err, "Failed to declare a queue")
 
 	// Configurar el canal de consumo de mensajes
-	messages, err := rabbitChannel.Consume(
+	messages, err := rb.rabbitChannel.Consume(
 		q.Name, // queue
 		"",     // consumer
 		true,   // auto-ack
@@ -86,24 +87,45 @@ func (rb *Rabbitmq) ReadDataFromQueue(qName string, msgChan chan<- string) error
 	return nil
 }
 
-// Start connection to rabbitmq server
 func (rb *Rabbitmq) InitRabbitMQ() {
 	var err error
-	rabbitConn, err = amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	connURL := "amqp://" + os.Getenv("RABBITMQ_DEFAULT_USER") + ":" + os.Getenv("RABBITMQ_DEFAULT_PASS") + "@rabbitmq:5672/"
 
-	rabbitChannel, err = rabbitConn.Channel()
+	// Reconnection attempts
+	maxRetries := 20
+	retryDelay := 5 * time.Second
+
+	for retries := 0; retries < maxRetries; retries++ {
+		// try to connect Rabbit server
+		rb.rabbitConn, err = amqp.Dial(connURL)
+		if err == nil {
+			fmt.Println("Conectado a RabbitMQ con éxito")
+			break
+		}
+
+		// if connection fails, wait to reconnect
+		fmt.Printf("Error al conectar a RabbitMQ (intento %d/%d): %s\n", retries+1, maxRetries, err)
+		if retries < maxRetries-1 {
+			time.Sleep(retryDelay) // wait before retrying
+		} else {
+			failOnError(err, "Failed to connect to RabbitMQ after multiple retries")
+			return
+		}
+	}
+
+	// try to open rabbitmq channel
+	rb.rabbitChannel, err = rb.rabbitConn.Channel()
 	failOnError(err, "Failed to open a channel")
 }
 
 // Close connection to Rabbitmq server
 func (rb *Rabbitmq) CloseRabbitMQ() {
-	if rabbitChannel != nil {
-		err := rabbitChannel.Close()
+	if rb.rabbitChannel != nil {
+		err := rb.rabbitChannel.Close()
 		failOnError(err, "Failed to close RabbitMQ channel")
 	}
-	if rabbitConn != nil {
-		err := rabbitConn.Close()
+	if rb.rabbitConn != nil {
+		err := rb.rabbitConn.Close()
 		failOnError(err, "Failed to close RabbitMQ connection")
 	}
 	log.Println("RabbitMQ connection closed successfully")

@@ -8,12 +8,15 @@ import (
 )
 
 type DataToExtract struct {
-	Id           int        `gorm:"primaryKey;autoIncrement" json:"id"`
-	VirusTotalId int        `gorm:"not null" json:"virus_total_id"` // Clave foránea explícita
-	Malicious    bool       `json:malicious`
-	VirusTotal   VirusTotal `gorm:"foreignKey:VirusTotalId;references:Id" json:"virus_total"` // Relación
-	FromFile     string     `json:from_file`
-	LineOfFile   int        `json:line_of_file`
+	Id           int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	Ip           string `json:"ip"`
+	Domain       string `json:"domain"`
+	VirusTotalId int    `gorm:"not null" json:"virus_total_id"` // Clave foránea explícita
+	Malicious    bool   `json:malicious`
+	FromFile     string `json:from_file`
+	LineOfFile   int    `json:line_of_file`
+
+	VirusTotal VirusTotal `gorm:"foreignKey:VirusTotalId;references:Id" json:"virus_total"` // Relación
 }
 
 func (dt *DataToExtract) ExtractData(db *gorm.DB, domain string, malicious bool) error {
